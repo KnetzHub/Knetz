@@ -1,4 +1,4 @@
-name: Commit Checks
+name: Commit & PR Checks
 
 on:
   push:
@@ -7,10 +7,13 @@ on:
       - develop
       - 'feature/**'
       - 'fix/**'
+  pull_request:
+    types: [opened, edited, synchronize]
 
 permissions:
   contents: read
   checks: write
+  pull-requests: read
 
 jobs:
   quick-checks:
@@ -67,12 +70,53 @@ jobs:
       run: |
         echo "Validating commit messages..."
         git log --format=%s origin/main..HEAD | while read -r msg; do
-          if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+'; then
+          # Allow both "feat: message" and "feat(scope): message" formats
+          if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?: .+'; then
             echo "❌ Invalid commit message format: $msg"
-            echo "Expected format: type(scope): subject"
-            echo "Example: feat(cluster): add AWS EKS support"
+            echo ""
+            echo "Expected formats:"
+            echo "  - type: subject"
+            echo "  - type(scope): subject"
+            echo ""
+            echo "Examples:"
+            echo "  - feat: add new feature"
+            echo "  - feat(cluster): add AWS EKS support"
+            echo "  - fix: resolve bug in scanner"
+            echo "  - fix(deps): update dependency version"
             exit 1
           fi
         done
         echo "✅ All commit messages are valid"
+  
+  pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Validate PR title follows Conventional Commits
+      uses: amannn/action-semantic-pull-request@v5
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        types: |
+          feat
+          fix
+          docs
+          style
+          refactor
+          perf
+          test
+          build
+          ci
+          chore
+          revert
+        requireScope: false
+        subjectPattern: ^(?![A-Z]).+$
+        subjectPatternError: |
+          The subject "{subject}" found in the pull request title "{title}"
+          didn't match the configured pattern. Please ensure that the subject
+          doesn't start with an uppercase character.
+        wip: false
+        validateSingleCommit: false
 
