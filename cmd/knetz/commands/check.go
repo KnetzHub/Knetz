@@ -46,7 +46,8 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	}
 	defer store.Close()
 
-	fmt.Println("🔍 Checking for version drift and violations...\n")
+	fmt.Println("🔍 Checking for version drift and violations...")
+	fmt.Println()
 
 	violations := 0
 	warnings := 0
@@ -87,7 +88,8 @@ func runCheck(cmd *cobra.Command, args []string) error {
 	// Check for version drift
 	fmt.Println("═══════════════════════════════════════════════════════════")
 	fmt.Println("  Version Drift Analysis")
-	fmt.Println("═══════════════════════════════════════════════════════════\n")
+	fmt.Println("═══════════════════════════════════════════════════════════")
+	fmt.Println()
 
 	for serviceName, clusterVersions := range serviceVersions {
 		if len(clusterVersions) < 2 {
@@ -133,7 +135,8 @@ func runCheck(cmd *cobra.Command, args []string) error {
 
 	fmt.Println("═══════════════════════════════════════════════════════════")
 	fmt.Println("  Summary")
-	fmt.Println("═══════════════════════════════════════════════════════════\n")
+	fmt.Println("═══════════════════════════════════════════════════════════")
+	fmt.Println()
 
 	fmt.Printf("🔴 Critical Violations: %d\n", violations)
 	fmt.Printf("🟡 Warnings: %d\n", warnings)
