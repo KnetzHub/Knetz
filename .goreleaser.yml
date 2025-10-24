@@ -42,13 +42,35 @@ snapshot:
   name_template: "{{ .Tag }}-next"
 
 changelog:
+  use: github
   sort: asc
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: 'Bug Fixes'
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: 'Performance Improvements'
+      regexp: "^.*perf[(\\w)]*:+.*$"
+      order: 2
+    - title: 'Code Refactoring'
+      regexp: "^.*refactor[(\\w)]*:+.*$"
+      order: 3
+    - title: 'Documentation'
+      regexp: "^.*docs[(\\w)]*:+.*$"
+      order: 4
+    - title: Others
+      order: 999
   filters:
     exclude:
-      - '^docs:'
       - '^test:'
       - '^chore:'
       - '^ci:'
+      - 'skip ci'
+      - 'skip changelog'
+      - Merge pull request
+      - Merge branch
 
 release:
   github:
