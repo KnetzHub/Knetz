@@ -1,0 +1,15 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 GitHub Discussions
+    url: https://github.com/knetz-io/knetz/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 🔒 Security Vulnerability (Sensitive)
+    url: mailto:security@knetz.io
+    about: Report sensitive security vulnerabilities privately
+  - name: 📚 Documentation
+    url: https://github.com/knetz-io/knetz/blob/main/README.md
+    about: Read our documentation
+  - name: 💡 Feature Discussions
+    url: https://github.com/knetz-io/knetz/discussions/categories/ideas
+    about: Discuss feature ideas before creating a formal request
+

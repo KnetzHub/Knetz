@@ -1,0 +1,95 @@
+name: Security Vulnerability
+description: Report a security vulnerability (use only for non-sensitive issues)
+title: "[Security]: "
+labels: ["security", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ⚠️ IMPORTANT: Security Vulnerabilities
+        
+        **DO NOT** use this form for sensitive security vulnerabilities!
+        
+        For sensitive security issues, please email: **security@knetz.io**
+        
+        See our [Security Policy](https://github.com/knetz-io/knetz/blob/main/SECURITY.md) for details.
+        
+        Use this form only for:
+        - Minor security concerns
+        - Security improvements
+        - Non-exploitable security hardening
+        - Documentation security issues
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Confirmation
+      description: Please confirm this is not a sensitive vulnerability
+      options:
+        - label: This is NOT a sensitive security vulnerability
+          required: true
+        - label: I have read the [Security Policy](https://github.com/knetz-io/knetz/blob/main/SECURITY.md)
+          required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Security Issue Type
+      options:
+        - Security Hardening
+        - Security Best Practice
+        - Documentation Update
+        - Dependency Update
+        - Configuration Issue
+        - Permission Issue
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe the security concern or improvement
+      placeholder: Detailed description...
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Potential Impact
+      description: What is the potential security impact?
+      placeholder: If exploited, this could...
+    validations:
+      required: true
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+      description: How should this be addressed?
+      placeholder: I recommend...
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any additional information
+      placeholder: Additional details...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://github.com/knetz-io/knetz/blob/main/CODE_OF_CONDUCT.md)
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
+
