@@ -558,32 +558,32 @@ CREATE INDEX idx_dependencies_service ON dependencies(service_id);
 ### 7. Dependency Declaration System
 
 **Tasks:**
-- [ ] Design dependency.yaml specification with scope awareness
-- [ ] Implement annotation-based dependency parser
-- [ ] Create dependency validation logic (cross-namespace, cross-cluster)
-- [ ] Build dependency resolver with scope context
-- [ ] Implement semantic versioning comparator
-- [ ] Add ConfigMap-based dependency support
+- [x] Design dependency.yaml specification with scope awareness
+- [x] Implement annotation-based dependency parser
+- [x] Create dependency validation logic (cross-namespace, cross-cluster)
+- [x] Build dependency resolver with scope context
+- [x] Implement semantic versioning comparator
+- [x] Add ConfigMap-based dependency support
 
 **Auto-Discovery Implementation:**
-- [ ] Extract from Helm charts (Chart.yaml, values.yaml, requirements.yaml)
-- [ ] Extract from environment variables in Deployment/DeploymentConfig specs
-- [ ] Extract from ConfigMap/Secret references
-- [ ] Extract from Service mesh configs (Istio VirtualService, DestinationRule, Linkerd ServiceProfile)
-- [ ] Extract from Kubernetes Network Policies
-- [ ] Extract from Ingress/Gateway rules
-- [ ] Extract from OpenShift Routes
-- [ ] Extract from Service object selectors and endpoints
-- [ ] Optional: Extract from Prometheus metrics (actual service-to-service traffic)
-- [ ] Optional: Scan application code repositories (go.mod, package.json, pom.xml, requirements.txt)
+- [x] Extract from Helm charts (Chart.yaml, values.yaml, requirements.yaml)
+- [x] Extract from environment variables in Deployment/DeploymentConfig specs
+- [x] Extract from ConfigMap/Secret references
+- [x] Extract from Service mesh configs (Istio VirtualService, DestinationRule, Linkerd ServiceProfile)
+- [x] Extract from Kubernetes Network Policies
+- [x] Extract from Ingress/Gateway rules
+- [x] Extract from OpenShift Routes
+- [x] Extract from Service object selectors and endpoints
+- [ ] Optional: Extract from Prometheus metrics (actual service-to-service traffic) - Phase 2
+- [ ] Optional: Scan application code repositories (go.mod, package.json, pom.xml, requirements.txt) - Phase 2
 
 **Auto-Discovery Tasks:**
-- [ ] Build multi-source dependency collector with plugins
-- [ ] Implement confidence scoring algorithm for discovered dependencies
-- [ ] Create dependency merge and deduplication logic
-- [ ] Build cross-validation between sources
-- [ ] Implement fallback to manual declaration
-- [ ] Add dependency source tracking
+- [x] Build multi-source dependency collector with plugins
+- [x] Implement confidence scoring algorithm for discovered dependencies
+- [x] Create dependency merge and deduplication logic
+- [x] Build cross-validation between sources
+- [x] Implement fallback to manual declaration
+- [x] Add dependency source tracking
 
 **Dependency Specification Format:**
 
@@ -681,32 +681,32 @@ spec:
 ```
 
 **Deliverables:**
-- Dependency declaration format (YAML + annotations)
-- Multi-source auto-discovery engine
-- Dependency resolver with scope awareness
-- Semantic versioning support
-- CLI command: `knetz deps discover --cluster <name>`
+- ✅ Dependency declaration format (YAML + annotations)
+- ✅ Multi-source auto-discovery engine
+- ✅ Dependency resolver with scope awareness
+- ✅ Semantic versioning support
+- ✅ CLI commands: `knetz deps show/validate/export`
 
 ---
 
 ### 8. Dependency Graph Builder
 
 **Tasks:**
-- [ ] Create graph data structure with scope nodes (tenant, cluster, namespace, service)
-- [ ] Implement dependency relationship mapping:
+- [x] Create graph data structure with scope nodes (tenant, cluster, namespace, service)
+- [x] Implement dependency relationship mapping:
   - Intra-namespace dependencies
   - Cross-namespace dependencies (same cluster)
   - Cross-cluster dependencies (same tenant)
   - Cross-tenant dependencies
-- [ ] Build graph traversal algorithms (DFS, BFS)
-- [ ] Detect circular dependencies at all scope levels
-- [ ] Calculate dependency chains and depth
-- [ ] Build cluster-level aggregated dependency graph
-- [ ] Build namespace-level dependency graph
-- [ ] Build tenant-level aggregated dependency graph
-- [ ] Implement cross-scope dependency tracking
-- [ ] Add graph pruning and filtering
-- [ ] Calculate service impact scores (how many services depend on this)
+- [x] Build graph traversal algorithms (DFS, BFS)
+- [x] Detect circular dependencies at all scope levels
+- [x] Calculate dependency chains and depth
+- [x] Build cluster-level aggregated dependency graph
+- [x] Build namespace-level dependency graph
+- [x] Build tenant-level aggregated dependency graph
+- [x] Implement cross-scope dependency tracking
+- [x] Add graph pruning and filtering
+- [x] Calculate service impact scores (how many services depend on this)
 
 **Graph Types:**
 
@@ -727,10 +727,12 @@ spec:
 ```
 
 **Deliverables:**
-- Multi-level dependency graph builder
-- Circular dependency detection
-- Impact analysis engine
-- CLI command: `knetz graph --tenant <name> --output graph.svg`
+- ✅ Multi-level dependency graph builder
+- ✅ Circular dependency detection
+- ✅ Impact analysis engine
+- ✅ CLI command: `knetz graph --tenant <name> --output graph.svg`
+- ✅ Transitive dependency calculation
+- ✅ Depth and impact scoring
 
 ---
 
