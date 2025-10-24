@@ -1,9 +1,6 @@
-name: Version Bump and Release
+name: Manual Release
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       bump_type:
@@ -23,7 +20,7 @@ permissions:
 
 jobs:
   version-bump:
-    name: Automated Version Bump
+    name: Manual Version Bump and Release
     runs-on: ubuntu-latest
     
     steps:

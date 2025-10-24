@@ -1,0 +1,78 @@
+name: Commit Checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'fix/**'
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  quick-checks:
+    name: Quick Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.24'
+
+    - name: Check formatting
+      run: |
+        if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+          echo "❌ Code is not formatted. Please run: gofmt -s -w ."
+          gofmt -s -l .
+          exit 1
+        fi
+        echo "✅ Code formatting is correct"
+
+    - name: Check go.mod and go.sum
+      run: |
+        go mod tidy
+        if ! git diff --exit-code go.mod go.sum; then
+          echo "❌ go.mod or go.sum is not tidy. Please run: go mod tidy"
+          exit 1
+        fi
+        echo "✅ go.mod and go.sum are tidy"
+
+    - name: Quick build
+      run: go build ./...
+
+    - name: Quick tests
+      run: go test -short ./...
+
+  commit-message:
+    name: Validate Commit Messages
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/develop'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Validate commit messages
+      run: |
+        echo "Validating commit messages..."
+        git log --format=%s origin/main..HEAD | while read -r msg; do
+          if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+'; then
+            echo "❌ Invalid commit message format: $msg"
+            echo "Expected format: type(scope): subject"
+            echo "Example: feat(cluster): add AWS EKS support"
+            exit 1
+          fi
+        done
+        echo "✅ All commit messages are valid"
+
