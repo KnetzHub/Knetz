@@ -1,0 +1,69 @@
+apiVersion: knetz.io/v1
+kind: ServiceDependency
+metadata:
+  name: service-a
+  version: "1.3.0"
+  namespace: production
+  cluster: prod-us-east
+  tenant: acme-corp
+  
+spec:
+  # Same namespace, same cluster dependency
+  dependencies:
+    - name: service-b
+      version: ">=2.0.0"
+      namespace: production
+      cluster: prod-us-east
+      required: true
+      description: "Service B provides data processing"
+      
+    # Different namespace, same cluster
+    - name: auth-service
+      version: "^3.0.0"
+      namespace: shared-services
+      cluster: prod-us-east
+      required: true
+      description: "Authentication service for user validation"
+      
+    # Cross-cluster dependency
+    - name: payment-gateway
+      version: ">=1.5.0"
+      namespace: production
+      cluster: prod-eu-west
+      tenant: acme-corp
+      required: false
+      description: "EU payment processing service"
+      
+    # External dependency (outside cluster)
+    - name: postgres
+      version: ">=13.0.0"
+      type: external
+      required: true
+      description: "PostgreSQL database"
+      
+    - name: redis
+      version: ">=6.0.0"
+      type: external
+      required: true
+      description: "Redis cache"
+      
+  # Cross-tenant dependencies (for shared services)
+  cross_tenant_dependencies:
+    - name: shared-api
+      tenant: platform-team
+      cluster: shared-prod
+      namespace: apis
+      version: ">=3.0.0"
+      required: true
+      description: "Platform API gateway"
+      
+  # API contracts (for future compatibility checking)
+  api_contracts:
+    - path: /api/v1/users
+      method: GET
+      schema_version: "1.0"
+      
+    - path: /api/v1/orders
+      method: POST
+      schema_version: "2.0"
+
