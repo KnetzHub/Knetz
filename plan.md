@@ -137,7 +137,7 @@ A standalone CLI tool that provides global visibility, dependency tracking, and 
 **Configuration Structure:**
 
 ```yaml
-# ~/.depmanager/config.yaml
+# ~/.knetz/config.yaml
 
 # Cluster definitions with multi-kubeconfig support
 clusters:
@@ -194,7 +194,7 @@ filters:
   include_namespaces: [production, staging, shared-services, dev]
   exclude_namespaces: [kube-system, kube-public, kube-node-lease]
   include_labels:
-    managed-by: depmanager
+    managed-by: knetz
   exclude_labels:
     ignore: "true"
 
@@ -225,7 +225,7 @@ output:
 # Storage
 storage:
   type: sqlite
-  path: ~/.depmanager/data.db
+  path: ~/.knetz/data.db
   retention_days: 90
 ```
 
@@ -233,7 +233,7 @@ storage:
 - Configuration parser and validator
 - Multi-kubeconfig support
 - Tenant and cluster grouping
-- CLI command: `depmanager init`
+- CLI command: `knetz init`
 
 ---
 
@@ -271,7 +271,7 @@ storage:
 - Support for all major cloud providers and OpenShift
 - Connection health monitoring
 - OpenShift-aware resource detection
-- CLI command: `depmanager cluster test`
+- CLI command: `knetz cluster test`
 
 ---
 
@@ -352,7 +352,7 @@ Tenant (acme-corp)
 - Comprehensive service discovery engine
 - Multi-source version extraction
 - Scope-tagged service inventory
-- CLI command: `depmanager scan --cluster <name>`
+- CLI command: `knetz scan --cluster <name>`
 
 ---
 
@@ -591,7 +591,7 @@ CREATE INDEX idx_dependencies_service ON dependencies(service_id);
 # Example: service-a-dependency.yaml
 # Can be stored as ConfigMap in cluster or in Git repo
 
-apiVersion: depmanager.io/v1
+apiVersion: knetz.io/v1
 kind: ServiceDependency
 metadata:
   name: service-a
@@ -670,12 +670,12 @@ metadata:
   name: service-a
   namespace: production
   annotations:
-    depmanager.io/dependencies: |
+    knetz.io/dependencies: |
       [
         {"name": "service-b", "version": ">=2.0.0", "namespace": "production"},
         {"name": "auth-service", "version": "^3.0.0", "namespace": "shared-services"}
       ]
-    depmanager.io/version: "1.3.0"
+    knetz.io/version: "1.3.0"
 spec:
   # ... deployment spec
 ```
@@ -685,7 +685,7 @@ spec:
 - Multi-source auto-discovery engine
 - Dependency resolver with scope awareness
 - Semantic versioning support
-- CLI command: `depmanager deps discover --cluster <name>`
+- CLI command: `knetz deps discover --cluster <name>`
 
 ---
 
@@ -730,7 +730,7 @@ spec:
 - Multi-level dependency graph builder
 - Circular dependency detection
 - Impact analysis engine
-- CLI command: `depmanager graph --tenant <name> --output graph.svg`
+- CLI command: `knetz graph --tenant <name> --output graph.svg`
 
 ---
 
@@ -784,7 +784,7 @@ drift_rules:
 - Compatibility checker
 - Violation reporting
 - Custom rules engine
-- CLI command: `depmanager check --tenant <name>`
+- CLI command: `knetz check --tenant <name>`
 
 ---
 
@@ -815,183 +815,183 @@ drift_rules:
 # ============================================
 
 # Generate initial configuration
-depmanager init
-depmanager init --config-path ~/.depmanager/config.yaml
+knetz init
+knetz init --config-path ~/.knetz/config.yaml
 
 # ============================================
 # CLUSTER MANAGEMENT
 # ============================================
 
 # Test cluster connectivity
-depmanager cluster test
-depmanager cluster test --cluster prod-us-east
+knetz cluster test
+knetz cluster test --cluster prod-us-east
 
 # List all configured clusters
-depmanager cluster list
-depmanager cluster list --tenant acme-corp
+knetz cluster list
+knetz cluster list --tenant acme-corp
 
 # Show cluster details
-depmanager cluster info --cluster prod-us-east
+knetz cluster info --cluster prod-us-east
 
 # ============================================
 # SCANNING & DISCOVERY
 # ============================================
 
 # Scan specific cluster
-depmanager scan --cluster prod-us-east
+knetz scan --cluster prod-us-east
 
 # Scan specific namespace in cluster
-depmanager scan --cluster prod-us-east --namespace production
+knetz scan --cluster prod-us-east --namespace production
 
 # Scan all clusters in a tenant
-depmanager scan --tenant acme-corp
+knetz scan --tenant acme-corp
 
 # Scan everything configured
-depmanager scan --all
+knetz scan --all
 
 # Scan with filters
-depmanager scan --cluster prod-us-east --include-namespaces production,staging
+knetz scan --cluster prod-us-east --include-namespaces production,staging
 
 # ============================================
 # DEPENDENCY DISCOVERY
 # ============================================
 
 # Discover dependencies automatically
-depmanager deps discover --cluster prod-us-east
+knetz deps discover --cluster prod-us-east
 
 # Show dependencies for a service
-depmanager deps show --service service-a --cluster prod-us-east --namespace production
+knetz deps show --service service-a --cluster prod-us-east --namespace production
 
 # Validate dependency declarations
-depmanager deps validate --cluster prod-us-east
+knetz deps validate --cluster prod-us-east
 
 # Export dependencies
-depmanager deps export --cluster prod-us-east --output deps.yaml
+knetz deps export --cluster prod-us-east --output deps.yaml
 
 # ============================================
 # VERSION COMPARISON
 # ============================================
 
 # Compare versions across clusters
-depmanager diff --cluster prod-us-east --cluster prod-eu-west
+knetz diff --cluster prod-us-east --cluster prod-eu-west
 
 # Compare namespaces within a cluster
-depmanager diff --cluster prod-us-east --namespace production --namespace staging
+knetz diff --cluster prod-us-east --namespace production --namespace staging
 
 # Compare tenants
-depmanager diff --tenant acme-corp --tenant beta-company
+knetz diff --tenant acme-corp --tenant beta-company
 
 # Compare specific service across all clusters
-depmanager diff --service service-a --tenant acme-corp
+knetz diff --service service-a --tenant acme-corp
 
 # ============================================
 # MATRIX VIEW (Multi-dimensional)
 # ============================================
 
 # Matrix view for entire tenant
-depmanager matrix --tenant acme-corp
+knetz matrix --tenant acme-corp
 
 # Matrix view for specific clusters
-depmanager matrix --cluster prod-us-east --cluster prod-eu-west
+knetz matrix --cluster prod-us-east --cluster prod-eu-west
 
 # Matrix view with filters
-depmanager matrix --tenant acme-corp --service service-a,service-b
+knetz matrix --tenant acme-corp --service service-a,service-b
 
 # Export matrix to CSV
-depmanager matrix --tenant acme-corp --output matrix.csv
+knetz matrix --tenant acme-corp --output matrix.csv
 
 # ============================================
 # VALIDATION & CHECKING
 # ============================================
 
 # Check for version drift and violations
-depmanager check --tenant acme-corp
+knetz check --tenant acme-corp
 
 # Check specific cluster
-depmanager check --cluster prod-us-east --namespace production
+knetz check --cluster prod-us-east --namespace production
 
 # Check with custom rules
-depmanager check --rules ./custom-rules.yaml --tenant acme-corp
+knetz check --rules ./custom-rules.yaml --tenant acme-corp
 
 # Check specific service dependencies
-depmanager check --service service-a --cluster prod-us-east
+knetz check --service service-a --cluster prod-us-east
 
 # ============================================
 # STATUS & HEALTH
 # ============================================
 
 # Overall system status
-depmanager status
+knetz status
 
 # Status for specific tenant
-depmanager status --tenant acme-corp
+knetz status --tenant acme-corp
 
 # Status with detailed view
-depmanager status --tenant acme-corp --verbose
+knetz status --tenant acme-corp --verbose
 
 # ============================================
 # GRAPH VISUALIZATION
 # ============================================
 
 # Generate dependency graph for tenant
-depmanager graph --tenant acme-corp --output graph.svg
+knetz graph --tenant acme-corp --output graph.svg
 
 # Graph for specific cluster
-depmanager graph --cluster prod-us-east --output graph.png
+knetz graph --cluster prod-us-east --output graph.png
 
 # Graph for specific service and its dependencies
-depmanager graph --service service-a --cluster prod-us-east --depth 2
+knetz graph --service service-a --cluster prod-us-east --depth 2
 
 # Graph with filtering
-depmanager graph --tenant acme-corp --exclude-external --output graph.svg
+knetz graph --tenant acme-corp --exclude-external --output graph.svg
 
 # ============================================
 # REPORTING
 # ============================================
 
 # Generate drift report
-depmanager report drift --tenant acme-corp --output report.md
+knetz report drift --tenant acme-corp --output report.md
 
 # Generate dependency report
-depmanager report dependencies --cluster prod-us-east --output deps.html
+knetz report dependencies --cluster prod-us-east --output deps.html
 
 # Generate summary report
-depmanager report summary --tenant acme-corp --output summary.json
+knetz report summary --tenant acme-corp --output summary.json
 
 # ============================================
 # OUTPUT FORMATS
 # ============================================
 
 # JSON output
-depmanager scan --cluster prod-us-east --output json
+knetz scan --cluster prod-us-east --output json
 
 # YAML output
-depmanager matrix --tenant acme-corp --output yaml
+knetz matrix --tenant acme-corp --output yaml
 
 # Table output (default)
-depmanager scan --cluster prod-us-east --output table
+knetz scan --cluster prod-us-east --output table
 
 # CSV output
-depmanager matrix --tenant acme-corp --output csv
+knetz matrix --tenant acme-corp --output csv
 
 # ============================================
 # GLOBAL FLAGS
 # ============================================
 
 # Specify custom config
-depmanager scan --config ~/.depmanager/custom-config.yaml --cluster prod-us-east
+knetz scan --config ~/.knetz/custom-config.yaml --cluster prod-us-east
 
 # Verbose output
-depmanager scan --cluster prod-us-east --verbose
+knetz scan --cluster prod-us-east --verbose
 
 # Debug mode
-depmanager scan --cluster prod-us-east --debug
+knetz scan --cluster prod-us-east --debug
 
 # No color output
-depmanager matrix --tenant acme-corp --no-color
+knetz matrix --tenant acme-corp --no-color
 
 # Dry run (show what would be done)
-depmanager scan --cluster prod-us-east --dry-run
+knetz scan --cluster prod-us-east --dry-run
 ```
 
 **Deliverables:**
@@ -1221,29 +1221,29 @@ docs/
 
 ```bash
 # Homebrew (macOS/Linux)
-brew install depmanager
+brew install knetz
 
 # Curl install script
-curl -sSL https://get.depmanager.io | bash
+curl -sSL https://get.knetz.io | bash
 
 # Go install
-go install github.com/your-org/depmanager@latest
+go install github.com/your-org/knetz@latest
 
 # Docker
-docker run --rm -v ~/.kube:/root/.kube depmanager/cli scan --all
+docker run --rm -v ~/.kube:/root/.kube knetz/cli scan --all
 
 # Download binary
-wget https://github.com/your-org/depmanager/releases/latest/download/depmanager-linux-amd64
-chmod +x depmanager-linux-amd64
-sudo mv depmanager-linux-amd64 /usr/local/bin/depmanager
+wget https://github.com/your-org/knetz/releases/latest/download/knetz-linux-amd64
+chmod +x knetz-linux-amd64
+sudo mv knetz-linux-amd64 /usr/local/bin/knetz
 
 # Debian/Ubuntu
-wget https://github.com/your-org/depmanager/releases/latest/download/depmanager_amd64.deb
-sudo dpkg -i depmanager_amd64.deb
+wget https://github.com/your-org/knetz/releases/latest/download/knetz_amd64.deb
+sudo dpkg -i knetz_amd64.deb
 
 # RHEL/CentOS
-wget https://github.com/your-org/depmanager/releases/latest/download/depmanager_amd64.rpm
-sudo rpm -i depmanager_amd64.rpm
+wget https://github.com/your-org/knetz/releases/latest/download/knetz_amd64.rpm
+sudo rpm -i knetz_amd64.rpm
 ```
 
 **Deliverables:**
@@ -1300,14 +1300,14 @@ Red Hat OpenShift support is built into the tool as a first-class citizen, allow
 
 ```bash
 # Detect OpenShift cluster automatically
-depmanager cluster test --cluster openshift-prod
+knetz cluster test --cluster openshift-prod
 # Output: Platform: OpenShift 4.12, Kubernetes: 1.25
 
 # Scan OpenShift-specific resources
-depmanager scan --cluster openshift-prod --scan-deploymentconfigs --scan-routes
+knetz scan --cluster openshift-prod --scan-deploymentconfigs --scan-routes
 
 # Show OpenShift Route information
-depmanager deps show --service frontend --cluster openshift-prod
+knetz deps show --service frontend --cluster openshift-prod
 # Output includes:
 #   Platform: OpenShift
 #   DeploymentConfig: frontend-dc
@@ -1315,10 +1315,10 @@ depmanager deps show --service frontend --cluster openshift-prod
 #   ImageStream: frontend:v1.2.0
 
 # Compare Kubernetes and OpenShift clusters
-depmanager matrix --cluster k8s-prod --cluster openshift-prod --show-platform
+knetz matrix --cluster k8s-prod --cluster openshift-prod --show-platform
 
 # Export with platform info
-depmanager report summary --tenant hybrid-org --include-platform-details
+knetz report summary --tenant hybrid-org --include-platform-details
 ```
 
 **Configuration Example:**
@@ -1648,13 +1648,13 @@ We request CNCF Sandbox status to:
 **Solution:**
 ```bash
 # Scan all production clusters
-depmanager scan --tenant production --cluster us-prod --cluster eu-prod --cluster asia-prod
+knetz scan --tenant production --cluster us-prod --cluster eu-prod --cluster asia-prod
 
 # Compare versions across regions
-depmanager diff --service payment-service --tenant production
+knetz diff --service payment-service --tenant production
 
 # Check for violations
-depmanager check --tenant production
+knetz check --tenant production
 
 # Output shows:
 # ❌ CRITICAL: payment-service version mismatch
@@ -1674,7 +1674,7 @@ depmanager check --tenant production
 **Solution:**
 ```bash
 # Check current dependencies
-depmanager deps show --service auth-service --cluster prod
+knetz deps show --service auth-service --cluster prod
 
 # Shows:
 # auth-service@prod:shared-services (v2.5.0)
@@ -1685,7 +1685,7 @@ depmanager deps show --service auth-service --cluster prod
 # │  └─ ... 12 more services
 
 # Test compatibility before upgrade
-depmanager check --what-if auth-service=v3.0.0 --cluster prod
+knetz check --what-if auth-service=v3.0.0 --cluster prod
 
 # Output suggests:
 # 1. Update user-service constraint to ^3.0.0
@@ -1703,13 +1703,13 @@ depmanager check --what-if auth-service=v3.0.0 --cluster prod
 **Solution:**
 ```bash
 # Compare staging vs production
-depmanager diff --cluster prod --cluster staging
+knetz diff --cluster prod --cluster staging
 
 # Check if staging versions can be safely promoted
-depmanager check --cluster staging --validate-against prod
+knetz check --cluster staging --validate-against prod
 
 # Matrix view
-depmanager matrix --cluster prod --cluster staging
+knetz matrix --cluster prod --cluster staging
 ```
 
 ### Use Case 4: Cross-Namespace Service Discovery
@@ -1722,13 +1722,13 @@ depmanager matrix --cluster prod --cluster staging
 **Solution:**
 ```bash
 # Auto-discover all dependencies in cluster
-depmanager deps discover --cluster prod --all-namespaces
+knetz deps discover --cluster prod --all-namespaces
 
 # Generate visual dependency graph
-depmanager graph --cluster prod --output architecture.svg
+knetz graph --cluster prod --output architecture.svg
 
 # Export documentation
-depmanager report dependencies --cluster prod --output README.md
+knetz report dependencies --cluster prod --output README.md
 ```
 
 ### Use Case 5: Hybrid Kubernetes & OpenShift Environment
@@ -1743,13 +1743,13 @@ depmanager report dependencies --cluster prod --output README.md
 **Solution:**
 ```bash
 # Scan both Kubernetes and OpenShift clusters
-depmanager scan --cluster k8s-prod --cluster openshift-prod
+knetz scan --cluster k8s-prod --cluster openshift-prod
 
 # Compare versions across platforms
-depmanager diff --cluster k8s-prod --cluster openshift-prod
+knetz diff --cluster k8s-prod --cluster openshift-prod
 
 # Show cross-platform dependencies
-depmanager deps show --service frontend-app --cluster k8s-prod
+knetz deps show --service frontend-app --cluster k8s-prod
 
 # Output shows:
 # frontend-app@k8s-prod:production (v2.1.0)
@@ -1762,10 +1762,10 @@ depmanager deps show --service frontend-app --cluster k8s-prod
 #     OpenShift Route: payment-api-route.apps.openshift.example.com
 
 # Matrix view showing both platforms
-depmanager matrix --tenant hybrid-org --output hybrid-services.csv
+knetz matrix --tenant hybrid-org --output hybrid-services.csv
 
 # Generate unified dependency graph
-depmanager graph --tenant hybrid-org --include-platform-info --output unified.svg
+knetz graph --tenant hybrid-org --include-platform-info --output unified.svg
 ```
 
 **Benefits:**
@@ -1846,10 +1846,10 @@ depmanager graph --tenant hybrid-org --include-platform-info --output unified.sv
 ## 📞 Support & Contact
 
 ### Getting Help
-- **Documentation:** docs.depmanager.io (future)
+- **Documentation:** docs.knetz.io (future)
 - **GitHub Issues:** Bug reports and feature requests
-- **Slack:** #depmanager on CNCF Slack (future)
-- **Stack Overflow:** Tag `depmanager`
+- **Slack:** #knetz on CNCF Slack (future)
+- **Stack Overflow:** Tag `knetz`
 
 ### Roadmap & Feedback
 - Public roadmap in GitHub Projects
