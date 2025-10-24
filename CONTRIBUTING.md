@@ -6,6 +6,43 @@ Thank you for your interest in contributing to Knetz! This document provides gui
 
 By participating in this project, you agree to maintain a respectful and inclusive environment for everyone.
 
+## 📦 Versioning and Releases
+
+Knetz follows [Semantic Versioning](https://semver.org/) and uses [Conventional Commits](https://www.conventionalcommits.org/) for automated version bumping and changelog generation.
+
+### Commit Message Format
+
+All commits must follow the Conventional Commits specification:
+
+```
+<type>(<scope>): <subject>
+```
+
+**Types:**
+- `feat`: New feature (MINOR version bump)
+- `fix`: Bug fix (PATCH version bump)
+- `docs`: Documentation changes
+- `style`: Code formatting
+- `refactor`: Code refactoring
+- `perf`: Performance improvement (PATCH version bump)
+- `test`: Test updates
+- `build`: Build system changes
+- `ci`: CI/CD changes
+- `chore`: Other changes
+
+**Breaking Changes** (MAJOR version bump):
+Add `!` after type or `BREAKING CHANGE:` in footer
+
+**Examples:**
+```bash
+feat(cluster): add AWS EKS integration
+fix(deps): resolve circular dependency issue
+docs(readme): update installation guide
+feat!(api): change configuration format
+```
+
+See [docs/VERSIONING.md](docs/VERSIONING.md) for complete details.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
