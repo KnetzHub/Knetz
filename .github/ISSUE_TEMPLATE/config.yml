@@ -1,6 +1,6 @@
 blank_issues_enabled: true
 contact_links:
   - name: 🔒 Security Vulnerability (Sensitive)
-    url: mailto:security@knetz.io
+    url: security@knetz.io
     about: Report sensitive security vulnerabilities privately
 
