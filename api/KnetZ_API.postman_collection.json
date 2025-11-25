@@ -1,0 +1,612 @@
+{
+  "info": {
+    "name": "KnetZ API",
+    "description": "Complete API collection for KnetZ - A Dependency Management Platform\n\n## Features\n- Public repository support (no auth required)\n- Private repository support (OAuth)\n- Automated version tracking\n- Dependency management\n- Webhooks and real-time syncing\n\n## Base URL\nhttp://localhost:3000/api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      {
+        "key": "value",
+        "value": "{{api_key}}",
+        "type": "string"
+      },
+      {
+        "key": "key",
+        "value": "x-api-key",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Health & Status",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Check API health status and service availability"
+          },
+          "response": []
+        },
+        {
+          "name": "Platform Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health/stats",
+              "host": ["{{base_url}}"],
+              "path": ["health", "stats"]
+            },
+            "description": "Get platform statistics including total services, users, syncs, and success rates"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Create Service",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"express\",\n  \"alias\": \"express-framework\",\n  \"repository\": \"github\",\n  \"repoURL\": \"https://github.com/expressjs/express\",\n  \"repoOwner\": \"expressjs\",\n  \"repoName\": \"express\",\n  \"visibility\": \"public\",\n  \"trackingMethod\": \"manual\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/services",
+              "host": ["{{base_url}}"],
+              "path": ["services"]
+            },
+            "description": "Create a new service manually (optional auth for public repos)"
+          },
+          "response": []
+        },
+        {
+          "name": "List All Services",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["services"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Get list of all services with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific service"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alias\": \"express-updated\",\n  \"trackingMethod\": \"cron\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/services/:id",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Update service metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Service",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Delete a service"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Versions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id/versions?limit=50&type=release",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id", "versions"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "type",
+                  "value": "release"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Get version history for a service"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Latest Version",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id/latest",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id", "latest"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Get the latest version of a service"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Service Dependencies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id/dependencies",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id", "dependencies"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Get dependencies for a service"
+          },
+          "response": []
+        },
+        {
+          "name": "Trigger Manual Sync",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/services/:id/sync",
+              "host": ["{{base_url}}"],
+              "path": ["services", ":id", "sync"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Trigger manual sync for a service (works without auth for public repos)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "GitHub Integration",
+      "item": [
+        {
+          "name": "OAuth Callback",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/integrations/github/callback?code={{github_oauth_code}}",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", "github", "callback"],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "{{github_oauth_code}}"
+                }
+              ]
+            },
+            "description": "Handle GitHub OAuth callback"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Repositories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/integrations/github/repos?page=1&perPage=30",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", "github", "repos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "30"
+                }
+              ]
+            },
+            "description": "Get list of repositories accessible to authenticated user"
+          },
+          "response": []
+        },
+        {
+          "name": "Import Public Repository",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repoURL\": \"https://github.com/expressjs/express\",\n  \"alias\": \"express\",\n  \"trackingMethod\": \"manual\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/integrations/github/import",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", "github", "import"]
+            },
+            "description": "Import a public GitHub repository (no authentication required)"
+          },
+          "response": []
+        },
+        {
+          "name": "Import Private Repository",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"repoURL\": \"https://github.com/myorg/private-repo\",\n  \"alias\": \"my-private-service\",\n  \"trackingMethod\": \"webhook\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/integrations/github/import",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", "github", "import"]
+            },
+            "description": "Import a private GitHub repository (requires authentication)"
+          },
+          "response": []
+        },
+        {
+          "name": "Setup Webhook",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": \"{{service_id}}\",\n  \"events\": [\"push\", \"release\", \"create\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/integrations/github/webhook",
+              "host": ["{{base_url}}"],
+              "path": ["integrations", "github", "webhook"]
+            },
+            "description": "Setup GitHub webhook for real-time updates (requires authentication)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Webhooks",
+      "item": [
+        {
+          "name": "GitHub Webhook Handler",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-GitHub-Event",
+                "value": "release"
+              },
+              {
+                "key": "X-Hub-Signature-256",
+                "value": "sha256=..."
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"published\",\n  \"release\": {\n    \"tag_name\": \"v1.0.0\",\n    \"published_at\": \"2025-11-25T12:00:00Z\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/webhooks/github/:serviceId",
+              "host": ["{{base_url}}"],
+              "path": ["webhooks", "github", ":serviceId"],
+              "variable": [
+                {
+                  "key": "serviceId",
+                  "value": "{{service_id}}"
+                }
+              ]
+            },
+            "description": "Webhook endpoint for GitHub events (called by GitHub)"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events?page=1&limit=20&type=version.detected&severity=info",
+              "host": ["{{base_url}}"],
+              "path": ["events"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "version.detected",
+                  "description": "Filter by event type"
+                },
+                {
+                  "key": "severity",
+                  "value": "info",
+                  "description": "Filter by severity (info, warning, error, critical)"
+                }
+              ]
+            },
+            "description": "Get list of events with filtering options"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Event by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/:id",
+              "host": ["{{base_url}}"],
+              "path": ["events", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{event_id}}"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific event"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Event as Read",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/events/:id/read",
+              "host": ["{{base_url}}"],
+              "path": ["events", ":id", "read"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{event_id}}"
+                }
+              ]
+            },
+            "description": "Mark an event as read"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Logs",
+      "item": [
+        {
+          "name": "List Sync Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/logs?page=1&limit=20&status=success&serviceId={{service_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "success",
+                  "description": "Filter by status (success, failed, partial)"
+                },
+                {
+                  "key": "serviceId",
+                  "value": "{{service_id}}",
+                  "description": "Filter by service ID"
+                }
+              ]
+            },
+            "description": "Get sync logs with filtering options"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Log by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/logs/:id",
+              "host": ["{{base_url}}"],
+              "path": ["logs", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{log_id}}"
+                }
+              ]
+            },
+            "description": "Get detailed information about a specific sync log"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "knetz_your_api_key_here",
+      "type": "string"
+    },
+    {
+      "key": "service_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "event_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "log_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "github_oauth_code",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
+
