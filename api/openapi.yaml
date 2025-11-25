@@ -1,0 +1,1064 @@
+openapi: 3.0.0
+info:
+  title: KnetZ API
+  version: 1.0.0
+  description: |
+    # KnetZ - Dependency Management Platform API
+    
+    A comprehensive API for tracking service versions, dependencies, and automating version management across multiple sources.
+    
+    ## Features
+    
+    - 🌍 **Public Repository Support** - Import and track public GitHub repositories without authentication
+    - 🔐 **Private Repository Support** - Full OAuth support for private repositories
+    - 📦 **Multi-Language Support** - Parse manifests for Node.js, Go, Python, Rust, and more
+    - 🔄 **Automated Syncing** - Cron-based and webhook-triggered synchronization
+    - 🔗 **Dependency Tracking** - Automatic dependency extraction and linking
+    - 📊 **Version Management** - Track releases, tags, and version history
+    
+    ## Authentication
+    
+    ### Public Repositories
+    For public GitHub repositories, **no authentication is required**. You can import and sync public repositories without any setup.
+    
+    ### Private Repositories
+    For private repositories, authentication is required using the `x-api-key` header.
+    
+    ## Rate Limits
+    
+    - **Unauthenticated**: 60 requests/hour per IP (GitHub public API limit)
+    - **Authenticated**: 5,000 requests/hour (GitHub authenticated limit)
+    
+  contact:
+    name: KnetZ Team
+    url: https://github.com/yourusername/knetz
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.knetz.io/v1
+    description: Production server
+
+tags:
+  - name: Health
+    description: Health check and platform statistics
+  - name: Services
+    description: Service management operations
+  - name: GitHub
+    description: GitHub integration endpoints
+  - name: Webhooks
+    description: Webhook handlers
+  - name: Events
+    description: Event management and notifications
+  - name: Logs
+    description: Sync logs and operation history
+
+security:
+  - ApiKeyAuth: []
+  - {}
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Check API health status and service availability
+      security: []
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  uptime:
+                    type: number
+                    example: 3600
+                  environment:
+                    type: string
+                    example: development
+                  version:
+                    type: string
+                    example: 1.0.0
+                  services:
+                    type: object
+                    properties:
+                      database:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                            example: connected
+                          name:
+                            type: string
+                            example: knetz
+
+  /health/stats:
+    get:
+      tags:
+        - Health
+      summary: Get platform statistics
+      description: Get platform statistics including total services, users, syncs, and success rates
+      security: []
+      responses:
+        '200':
+          description: Platform statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      overview:
+                        type: object
+                      sync:
+                        type: object
+
+  /services:
+    get:
+      tags:
+        - Services
+      summary: List all services
+      description: Get list of all services with pagination
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: repository
+          in: query
+          schema:
+            type: string
+            enum: [github, gitlab, docker]
+        - name: visibility
+          in: query
+          schema:
+            type: string
+            enum: [public, private]
+      responses:
+        '200':
+          description: List of services
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Service'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags:
+        - Services
+      summary: Create a new service
+      description: Manually create a new service (optional auth for public repos)
+      security:
+        - {}
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceCreate'
+      responses:
+        '201':
+          description: Service created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Service'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /services/{id}:
+    get:
+      tags:
+        - Services
+      summary: Get service by ID
+      description: Get detailed information about a specific service
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Service'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - Services
+      summary: Update service
+      description: Update service metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdate'
+      responses:
+        '200':
+          description: Service updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Service'
+
+    delete:
+      tags:
+        - Services
+      summary: Delete service
+      description: Delete a service
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /services/{id}/versions:
+    get:
+      tags:
+        - Services
+      summary: Get service versions
+      description: Get version history for a service
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [release, tag, commit, image]
+      responses:
+        '200':
+          description: Version history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      serviceId:
+                        type: string
+                      serviceName:
+                        type: string
+                      totalVersions:
+                        type: number
+                      versions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Version'
+
+  /services/{id}/latest:
+    get:
+      tags:
+        - Services
+      summary: Get latest version
+      description: Get the latest version of a service
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Latest version
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Version'
+
+  /services/{id}/dependencies:
+    get:
+      tags:
+        - Services
+      summary: Get service dependencies
+      description: Get dependencies for a service
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service dependencies
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      serviceId:
+                        type: string
+                      serviceName:
+                        type: string
+                      dependencies:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Dependency'
+                      metadata:
+                        type: object
+
+  /services/{id}/sync:
+    post:
+      tags:
+        - Services
+      summary: Trigger manual sync
+      description: Trigger manual sync for a service (works without auth for public repos)
+      security:
+        - {}
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sync completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      versionsAdded:
+                        type: number
+                      versionsUpdated:
+                        type: number
+
+  /integrations/github/callback:
+    get:
+      tags:
+        - GitHub
+      summary: GitHub OAuth callback
+      description: Handle GitHub OAuth callback
+      security: []
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  user:
+                    type: object
+
+  /integrations/github/repos:
+    get:
+      tags:
+        - GitHub
+      summary: Get user repositories
+      description: Get list of repositories accessible to authenticated user
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: perPage
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        '200':
+          description: List of repositories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+
+  /integrations/github/import:
+    post:
+      tags:
+        - GitHub
+      summary: Import GitHub repository
+      description: |
+        Import a GitHub repository as a service.
+        
+        **Public Repositories**: No authentication required
+        **Private Repositories**: Requires x-api-key header
+      security:
+        - {}
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - repoURL
+              properties:
+                repoURL:
+                  type: string
+                  example: https://github.com/expressjs/express
+                alias:
+                  type: string
+                  example: express
+                trackingMethod:
+                  type: string
+                  enum: [manual, cron, webhook]
+                  default: manual
+      responses:
+        '201':
+          description: Repository imported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Service'
+
+  /integrations/github/webhook:
+    post:
+      tags:
+        - GitHub
+      summary: Setup webhook
+      description: Setup GitHub webhook for real-time updates (requires authentication)
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - serviceId
+              properties:
+                serviceId:
+                  type: string
+                events:
+                  type: array
+                  items:
+                    type: string
+                    enum: [push, release, create]
+                  default: [push, release, create]
+      responses:
+        '200':
+          description: Webhook created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+
+  /webhooks/github/{serviceId}:
+    post:
+      tags:
+        - Webhooks
+      summary: GitHub webhook handler
+      description: Webhook endpoint for GitHub events (called by GitHub)
+      security: []
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: X-GitHub-Event
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: X-Hub-Signature-256
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook received
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /events:
+    get:
+      tags:
+        - Events
+      summary: List events
+      description: Get list of events with filtering options
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [info, warning, error, critical]
+      responses:
+        '200':
+          description: List of events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /events/{id}:
+    get:
+      tags:
+        - Events
+      summary: Get event by ID
+      description: Get detailed information about a specific event
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Event'
+
+  /events/{id}/read:
+    post:
+      tags:
+        - Events
+      summary: Mark event as read
+      description: Mark an event as read
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+
+  /logs:
+    get:
+      tags:
+        - Logs
+      summary: List sync logs
+      description: Get sync logs with filtering options
+      security: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [success, failed, partial]
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of sync logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SyncLog'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /logs/{id}:
+    get:
+      tags:
+        - Logs
+      summary: Get log by ID
+      description: Get detailed information about a specific sync log
+      security: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sync log details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/SyncLog'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+      description: API key for authentication (required for private repositories)
+
+  schemas:
+    Service:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 507f1f77bcf86cd799439011
+        name:
+          type: string
+          example: express
+        alias:
+          type: string
+          example: express-framework
+        repository:
+          type: string
+          enum: [github, gitlab, docker, quay]
+          example: github
+        repoURL:
+          type: string
+          example: https://github.com/expressjs/express
+        repoOwner:
+          type: string
+          example: expressjs
+        repoName:
+          type: string
+          example: express
+        visibility:
+          type: string
+          enum: [public, private]
+          example: public
+        trackingMethod:
+          type: string
+          enum: [manual, cron, webhook]
+          example: manual
+        lastSyncedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Version'
+        dependencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/Dependency'
+        metadata:
+          type: object
+          properties:
+            language:
+              type: string
+              example: javascript
+            packageManager:
+              type: string
+              example: npm
+            manifestFile:
+              type: string
+              example: package.json
+
+    ServiceCreate:
+      type: object
+      required:
+        - name
+        - repository
+        - repoURL
+        - repoOwner
+        - repoName
+      properties:
+        name:
+          type: string
+        alias:
+          type: string
+        repository:
+          type: string
+        repoURL:
+          type: string
+        repoOwner:
+          type: string
+        repoName:
+          type: string
+        visibility:
+          type: string
+        trackingMethod:
+          type: string
+
+    ServiceUpdate:
+      type: object
+      properties:
+        alias:
+          type: string
+        trackingMethod:
+          type: string
+
+    Version:
+      type: object
+      properties:
+        version:
+          type: string
+          example: 4.18.2
+        type:
+          type: string
+          enum: [release, tag, commit, image]
+          example: release
+        releasedAt:
+          type: string
+          format: date-time
+        changelog:
+          type: string
+          example: Bug fixes and improvements
+        artifacts:
+          type: array
+          items:
+            type: string
+        isMajor:
+          type: boolean
+          example: false
+        isPrerelease:
+          type: boolean
+          example: false
+
+    Dependency:
+      type: object
+      properties:
+        name:
+          type: string
+          example: body-parser
+        currentVersion:
+          type: string
+          example: 1.20.1
+        requiredVersion:
+          type: string
+          example: 1.20.1
+        serviceId:
+          type: string
+          example: 507f1f77bcf86cd799439011
+        status:
+          type: string
+          enum: [up-to-date, outdated, external, unknown, ahead]
+          example: up-to-date
+
+    Event:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 507f1f77bcf86cd799439011
+        type:
+          type: string
+          example: version.detected
+        severity:
+          type: string
+          enum: [info, warning, error, critical]
+          example: info
+        serviceId:
+          type: string
+        userId:
+          type: string
+        message:
+          type: string
+          example: New version 1.2.3 detected
+        details:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        isArchived:
+          type: boolean
+          example: false
+
+    SyncLog:
+      type: object
+      properties:
+        _id:
+          type: string
+        serviceId:
+          type: string
+        serviceName:
+          type: string
+        syncType:
+          type: string
+          enum: [manual, cron, webhook, cli]
+        status:
+          type: string
+          enum: [success, failed, partial]
+        triggeredBy:
+          type: string
+          enum: [system, user, webhook]
+        versionsAdded:
+          type: number
+        versionsUpdated:
+          type: number
+        errors:
+          type: array
+          items:
+            type: object
+        duration:
+          type: number
+          description: Duration in milliseconds
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 5
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: SERVICE_NOT_FOUND
+            message:
+              type: string
+              example: Service not found
+            details:
+              type: object
+            timestamp:
+              type: string
+              format: date-time
+
+  responses:
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+

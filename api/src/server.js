@@ -2,12 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
 import { connectDB } from './config/database.js';
 import cronService from './services/cronService.js';
 import logger from './utils/logger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimiter } from './middleware/rateLimiter.js';
 import routes from './routes/index.js';
+import swaggerSpec from './swagger.js';
 
 // Load environment variables
 dotenv.config();
@@ -17,7 +19,9 @@ const PORT = process.env.PORT || 3000;
 const API_VERSION = process.env.API_VERSION || 'v1';
 
 // Middleware
-app.use(helmet()); // Security headers
+app.use(helmet({
+  contentSecurityPolicy: false // Disable CSP for Swagger UI
+})); // Security headers
 app.use(cors({
   origin: process.env.CORS_ORIGIN || '*',
   credentials: true
@@ -35,6 +39,19 @@ app.use((req, res, next) => {
   next();
 });
 
+// Swagger API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'KnetZ API Documentation',
+  customfavIcon: '/favicon.ico'
+}));
+
+// Swagger JSON
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
+
 // API Routes
 app.use(`/api/${API_VERSION}`, routes);
 
@@ -44,6 +61,16 @@ app.get('/', (req, res) => {
     name: 'KnetZ API',
     version: '1.0.0',
     status: 'running',
+    documentation: {
+      swagger: `http://localhost:${PORT}/api-docs`,
+      openapi: `http://localhost:${PORT}/api-docs.json`,
+      postman: 'Import KnetZ_API.postman_collection.json'
+    },
+    endpoints: {
+      health: `http://localhost:${PORT}/api/${API_VERSION}/health`,
+      services: `http://localhost:${PORT}/api/${API_VERSION}/services`,
+      github: `http://localhost:${PORT}/api/${API_VERSION}/integrations/github`
+    },
     timestamp: new Date().toISOString()
   });
 });
@@ -81,6 +108,8 @@ const startServer = async () => {
       logger.info(`🚀 KnetZ API server running on port ${PORT}`);
       logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info(`🔗 API Base URL: http://localhost:${PORT}/api/${API_VERSION}`);
+      logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+      logger.info(`📄 OpenAPI Spec: http://localhost:${PORT}/api-docs.json`);
     });
   } catch (error) {
     logger.error('Failed to start server:', error);
